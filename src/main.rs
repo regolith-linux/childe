@@ -1,17 +1,13 @@
 use std::{error::Error, process::Command};
 use swayipc::{Connection, Fallible};
+use trawlcat::rescat;
 
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let mut sway_cn = Connection::new()?;
     let gap_index = find_gap(&workspace_nums(&mut sway_cn)?);
     let resource_name = format!("wm.workspace.{:02}.name", gap_index);
-
-    let workspace_name_raw = Command::new("trawlcat")
-        .args([resource_name, format!("number {gap_index}")])
-        .output()
-        .unwrap()
-        .stdout;
-    let workspace_name = String::from_utf8(workspace_name_raw).unwrap();
+    let workspace_name = rescat(&resource_name, Some(format!("number {gap_index}"))).await?;
     sway_cn.run_command(format!("workspace {workspace_name}"))?;
     Ok(())
 }
