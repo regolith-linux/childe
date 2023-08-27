@@ -27,25 +27,17 @@ fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
 
 // assumes input list is already sorted in ascending order
 fn find_gap(items: &Vec<i32>) -> i32 {
-    match items.len() {
-        0 => 1, // empty list should take index 1
-        _ => {
-            let mut iter = items.iter().peekable();
-
-            while let Some(cv) = iter.next() {
-                match iter.peek() {
-                    Some(nv) => {
-                        if **nv != cv + 1 {
-                            return cv + 1;
-                        } // next element greater than current + 1
-                    }
-                    _ => return cv + 1, // last element
-                }
-            }
-
-            return items.last().expect("not empty") + 1; // fallback to return last element + 1
+    // Get the enumerated iterator of form (position, workspace_number)
+    let iter = items.iter().enumerate();
+    for (pos, &wn) in iter {
+        let expected = pos as i32 + 1;
+        if wn != expected {
+            return expected;
         }
     }
+
+    // Return last element or 1
+    items.last().unwrap_or(&0) + 1
 }
 
 #[cfg(test)]
@@ -87,6 +79,16 @@ mod test {
         let td = vec![1, 3];
 
         let expected = 2;
+        let actual = find_gap(&td);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_find_gap_base_2() {
+        let td = vec![2, 3];
+
+        let expected = 1;
         let actual = find_gap(&td);
 
         assert_eq!(expected, actual);
