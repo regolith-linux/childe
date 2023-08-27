@@ -16,7 +16,7 @@ fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
 // assumes input list is already sorted in ascending order
 fn find_gap(items: &Vec<i32>) -> i32 {
     match items.len() {
-        0 => return 1, // empty list should take index 1
+        0 => 1, // empty list should take index 1
         _ => {
             let mut iter = items.iter().peekable();
 
@@ -77,5 +77,4 @@ mod test {
 
         assert_eq!(expected, actual);
     }
-
 }
