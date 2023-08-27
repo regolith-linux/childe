@@ -1,10 +1,18 @@
-use swayipc::{Connection, Error, Fallible};
+use std::{error::Error, process::Command};
+use swayipc::{Connection, Fallible};
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), Box<dyn Error>> {
     let mut sway_cn = Connection::new()?;
     let gap_index = find_gap(&workspace_nums(&mut sway_cn)?);
-    sway_cn.run_command(format!("workspace number {gap_index}"))?;
+    let resource_name = format!("wm.workspace.{:02}.name", gap_index);
 
+    let workspace_name_raw = Command::new("trawlcat")
+        .args([resource_name, format!("number {gap_index}")])
+        .output()
+        .unwrap()
+        .stdout;
+    let workspace_name = String::from_utf8(workspace_name_raw).unwrap();
+    sway_cn.run_command(format!("workspace {workspace_name}"))?;
     Ok(())
 }
 
