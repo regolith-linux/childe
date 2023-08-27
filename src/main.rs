@@ -18,7 +18,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 // return index of active workspaces
 fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
-    Ok(connection.get_workspaces()?.iter().map(|ws| ws.num).collect())
+    Ok(connection
+        .get_workspaces()?
+        .iter()
+        .map(|ws| ws.num)
+        .collect())
 }
 
 // assumes input list is already sorted in ascending order
