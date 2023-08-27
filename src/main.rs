@@ -10,7 +10,11 @@ fn main() -> Result<(), Error> {
 
 // return index of active workspaces
 fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
-    Ok(connection.get_workspaces()?.iter().map(|ws| ws.num).collect())
+    Ok(connection
+        .get_workspaces()?
+        .iter()
+        .map(|ws| ws.num)
+        .collect())
 }
 
 // assumes input list is already sorted in ascending order
@@ -23,13 +27,15 @@ fn find_gap(items: &Vec<i32>) -> i32 {
             while let Some(cv) = iter.next() {
                 match iter.peek() {
                     Some(nv) => {
-                        if **nv != cv + 1 { return cv + 1 } // next element greater than current + 1
+                        if **nv != cv + 1 {
+                            return cv + 1;
+                        } // next element greater than current + 1
                     }
-                    _ => return cv + 1 // last element
+                    _ => return cv + 1, // last element
                 }
             }
-        
-            return items.last().expect("not empty") + 1 // fallback to return last element + 1
+
+            return items.last().expect("not empty") + 1; // fallback to return last element + 1
         }
     }
 }
