@@ -2,6 +2,17 @@ use human_panic::setup_panic;
 use std::error::Error;
 use swayipc::{Connection, Fallible};
 use trawlcat::rescat;
+use clap::Parser;
+
+/// Simple command line utility to find the next non-opened workspace and go there.
+#[derive(Parser, Debug)]
+#[command(name="childe", version, about)]
+struct CliArgs {
+    #[arg(short, long="move-window")]
+    move_window: bool,
+    #[arg(short, long="follow", requires="move_window")]
+    follow: bool
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
