@@ -15,8 +15,15 @@ struct CliArgs {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let args = CliArgs::parse();
     let mut sway_cn = Connection::new()?;
     let workspace_name = get_workspace_name(&mut sway_cn).await?;
+    if args.move_window {
+        sway_cn.run_command(format!("move window to workspace {workspace_name}"))?;
+    } 
+    if !args.move_window || args.follow {
+        sway_cn.run_command(format!("workspace {workspace_name}"))?;
+    }
     Ok(())
 }
 
