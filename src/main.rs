@@ -17,16 +17,14 @@ struct CliArgs {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     setup_panic!();
+    let args = CliArgs::parse();
     let mut sway_cn = Connection::new().expect("Cannot create Sway IPC connection");
-    let gap_index =
-        find_gap(&workspace_nums(&mut sway_cn).expect("Cannot read workspaces from Sway"));
-    let resource_name = format!("wm.workspace.{:02}.name", gap_index);
-    let workspace_name = rescat(&resource_name, Some(format!("number {gap_index}")))
-        .await
-        .expect("Cannot load workspace from resource name");
-    sway_cn
-        .run_command(format!("workspace {workspace_name}"))
-        .expect("Cannot run Sway command");
+    let workspace_name = get_workspace_name(&mut sway_cn).await.expect("Cannot get workspace name");
+    if args.move_window {
+        sway_cn.run_command(format!("move window to workspace {workspace_name}")).expect("Cannot run command");
+    } else if args.follow {
+        sway_cn.run_command(format!("workspace {workspace_name}")).expect("Cannot run command");
+    }
 
     Ok(())
 }
