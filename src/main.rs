@@ -1,21 +1,42 @@
+use clap::Parser;
 use human_panic::setup_panic;
 use std::error::Error;
 use swayipc::{Connection, Fallible};
 use trawlcat::rescat;
 
+/// Simple command line utility to find and move to the next unallocated workspace.
+#[derive(Parser, Debug)]
+#[command(name = "childe", version, about)]
+struct CliArgs {
+    #[arg(short, long = "move-window")]
+    move_window: bool,
+    #[arg(short, long = "follow", requires = "move_window")]
+    follow: bool,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    // Init
     setup_panic!();
+    let args = CliArgs::parse();
     let mut sway_cn = Connection::new().expect("Cannot create Sway IPC connection");
-    let gap_index =
-        find_gap(&workspace_nums(&mut sway_cn).expect("Cannot read workspaces from Sway"));
-    let resource_name = format!("wm.workspace.{:02}.name", gap_index);
-    let workspace_name = rescat(&resource_name, Some(format!("number {gap_index}")))
+
+    // Find unallocated workspace
+    let workspace_name = get_workspace_name(&mut sway_cn)
         .await
-        .expect("Cannot load workspace from resource name");
-    sway_cn
-        .run_command(format!("workspace {workspace_name}"))
-        .expect("Cannot run Sway command");
+        .expect("Cannot get workspace name");
+
+    // Move and navigate based on params
+    if args.move_window {
+        sway_cn
+            .run_command(format!("move window to workspace {workspace_name}"))
+            .expect("Cannot run command");
+    }
+    if !args.move_window || args.follow {
+        sway_cn
+            .run_command(format!("workspace {workspace_name}"))
+            .expect("Cannot run command");
+    }
 
     Ok(())
 }
@@ -30,7 +51,7 @@ fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
 }
 
 // assumes input list is sorted in ascending order
-fn find_gap(items: &Vec<i32>) -> i32 {
+fn find_gap(items: &[i32]) -> i32 {
     // Get the enumerated iterator of form (position, workspace_number)
     let iter = items.iter().enumerate();
     for (pos, &wn) in iter {
@@ -42,6 +63,14 @@ fn find_gap(items: &Vec<i32>) -> i32 {
 
     // Return last element or 1
     items.last().unwrap_or(&0) + 1
+}
+
+// return the name of the next empty workspace
+async fn get_workspace_name(conn: &mut Connection) -> Result<String, Box<dyn Error>> {
+    let gap_index = find_gap(&workspace_nums(conn)?);
+    let resource_name = format!("wm.workspace.{:02}.name", gap_index);
+    let workspace_name = rescat(&resource_name, Some(format!("number {gap_index}"))).await?;
+    Ok(workspace_name)
 }
 
 #[cfg(test)]

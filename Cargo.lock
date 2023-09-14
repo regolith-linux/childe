@@ -222,6 +222,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 name = "childe"
 version = "0.1.0"
 dependencies = [
+ "clap 4.4.1",
  "human-panic",
  "swayipc",
  "tokio",
@@ -236,13 +237,36 @@ checksum = "4ea181bf566f71cb9a5d17a59e1871af638180a18fb0035c92ae62b705207123"
 dependencies = [
  "atty",
  "bitflags 1.3.2",
- "clap_derive",
- "clap_lex",
+ "clap_derive 3.2.25",
+ "clap_lex 0.2.4",
  "indexmap 1.9.3",
  "once_cell",
  "strsim",
  "termcolor",
  "textwrap",
+]
+
+[[package]]
+name = "clap"
+version = "4.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c8d502cbaec4595d2e7d5f61e318f05417bd2b66fdc3809498f0d3fdf0bea27"
+dependencies = [
+ "clap_builder",
+ "clap_derive 4.4.0",
+ "once_cell",
+]
+
+[[package]]
+name = "clap_builder"
+version = "4.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5891c7bc0edb3e1c2204fc5e94009affabeb1821c9e5fdc3959536c5c0bb984d"
+dependencies = [
+ "anstream",
+ "anstyle",
+ "clap_lex 0.5.1",
+ "strsim",
 ]
 
 [[package]]
@@ -259,6 +283,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap_derive"
+version = "4.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9fd1a5729c4548118d7d70ff234a44868d00489a4b6597b0b020918a0e91a1a"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.29",
+]
+
+[[package]]
 name = "clap_lex"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -266,6 +302,12 @@ checksum = "2850f2f5a82cbf437dd5af4d49848fbdfc27c157c3d010345776f952765261c5"
 dependencies = [
  "os_str_bytes",
 ]
+
+[[package]]
+name = "clap_lex"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "colorchoice"
@@ -1215,7 +1257,7 @@ version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "167b079cc2f81640448ce22d9656a1a775cc1bbe1569ed095a447af6811e6c05"
 dependencies = [
- "clap",
+ "clap 3.2.25",
  "string-error",
  "tokio",
  "trawldb",
@@ -1227,7 +1269,7 @@ version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acaaee24e0a47f51f3e83b514bd1079241ea3eae8a3a43090192d02e66fae385"
 dependencies = [
- "clap",
+ "clap 3.2.25",
  "tokio",
  "zbus",
 ]
