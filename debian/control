@@ -1,0 +1,14 @@
+Source: childe
+Section: utils
+Priority: optional
+Maintainer: Regolith Linux <regolith.linux@gmail.com>
+Build-Depends: cargo, debhelper
+Standards-Version: 4.1.3
+Homepage: https://regolith-desktop.com
+
+Package: childe
+Architecture: any
+Depends: ${misc:Depends}
+Description: Utility to open next workspace
+ An wm utility intended to be called by keybinding
+ to open next available empty workspace.
