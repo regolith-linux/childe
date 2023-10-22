@@ -1,1 +1,1 @@
-childe usr/bin
+target/release/childe /usr/bin/
