@@ -2,8 +2,9 @@ childe (0.1.1) focal; urgency=medium
 
   [ Soumya Ranjan Patnaik ]
   * chore: pin trawlcat to 0.2.6
+  * fix: ensure the workspaces are in sorted order
 
- -- Soumya Ranjan Panaik <soumyaranjan1812@gmail.com>  Wed, 25 Oct 2023 06:37:15 +0530
+ -- Soumya Ranjan Panaik <soumyaranjan1812@gmail.com>  Wed, 25 Oct 2023 06:49:17 +0530
 
 childe (0.1.0-1) focal; urgency=medium
 
