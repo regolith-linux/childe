@@ -8,4 +8,4 @@ human-panic = "1"
 clap = { version = "4.3.0", features = ["derive"] }
 swayipc = "3"
 tokio = "1"
-trawlcat = "0.2.5"
+trawlcat = "0.2.6"
