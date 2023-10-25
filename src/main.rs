@@ -43,11 +43,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 // return index of active workspaces
 fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
-    Ok(connection
+    let mut workspace_nums:Vec<_> = connection
         .get_workspaces()?
         .iter()
         .map(|ws| ws.num)
-        .collect())
+        .collect();
+
+    workspace_nums.sort();
+
+    Ok(workspace_nums)
 }
 
 // assumes input list is sorted in ascending order
