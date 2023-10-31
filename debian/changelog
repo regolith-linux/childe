@@ -1,3 +1,9 @@
+childe (0.1.2) focal; urgency=medium
+
+  * chore: bump program version to match debian package version
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Mon, 30 Oct 2023 21:03:02 -0700
+
 childe (0.1.1) focal; urgency=medium
 
   [ Soumya Ranjan Patnaik ]
