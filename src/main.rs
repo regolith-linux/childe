@@ -1,5 +1,4 @@
 use clap::Parser;
-use human_panic::setup_panic;
 use std::error::Error;
 use swayipc::{Connection, Fallible};
 use trawlcat::rescat;
@@ -17,7 +16,6 @@ struct CliArgs {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // Init
-    setup_panic!();
     let args = CliArgs::parse();
     let mut sway_cn = Connection::new().expect("Cannot create Sway IPC connection");
 

@@ -4,8 +4,7 @@ version = "0.1.2"
 edition = "2021"
 
 [dependencies]
-human-panic = "1"
-clap = { version = "4.3.0", features = ["derive"] }
+clap = { version = "4.2.0", features = ["derive"] }
 swayipc = "3"
 tokio = "1"
 trawlcat = "0.2.6"
