@@ -9,6 +9,12 @@ Homepage: https://regolith-desktop.com
 Package: childe
 Architecture: any
 Depends: ${misc:Depends}
+Recommends: x11-xserver-utils
 Description: Utility to open next workspace
  An wm utility intended to be called by keybinding
  to open next available empty workspace.
+ .
+ With --workspace-names it keeps running and keeps every
+ workspace's name showing the apps on it, in sway and i3.
+ In i3 it reads its resources with xrdb, from
+ x11-xserver-utils.

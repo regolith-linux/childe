@@ -1,8 +1,13 @@
+mod ipc;
+mod names;
+mod resources;
+
 use clap::Parser;
 use human_panic::setup_panic;
+use ipc::Connection;
+use resources::Resources;
+use serde_json::Value;
 use std::error::Error;
-use swayipc::{Connection, Fallible};
-use trawlcat::rescat;
 
 /// Simple command line utility to find and move to the next unallocated workspace.
 #[derive(Parser, Debug)]
@@ -12,38 +17,59 @@ struct CliArgs {
     move_window: bool,
     #[arg(short, long = "follow", requires = "move_window")]
     follow: bool,
+    /// Keep running, and keep every workspace's name showing the apps on it
+    #[arg(short = 'w', long = "workspace-names", conflicts_with = "move_window")]
+    workspace_names: bool,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     // Init
     setup_panic!();
     let args = CliArgs::parse();
-    let mut sway_cn = Connection::new().expect("Cannot create Sway IPC connection");
+
+    if args.workspace_names {
+        std::process::exit(names::run());
+    }
+
+    let mut conn = Connection::connect().expect("Cannot create window manager IPC connection");
 
     // Find unallocated workspace
-    let workspace_name = get_workspace_name(&mut sway_cn)
-        .await
-        .expect("Cannot get workspace name");
+    let target = get_workspace_target(&mut conn).expect("Cannot get workspace name");
 
     // Move and navigate based on params
-    if args.move_window {
-        sway_cn
-            .run_command(format!("move window to workspace {workspace_name}"))
-            .expect("Cannot run command");
-    }
-    if !args.move_window || args.follow {
-        sway_cn
-            .run_command(format!("workspace {workspace_name}"))
-            .expect("Cannot run command");
-    }
+    conn.run_command(&navigation_command(&target, args.move_window, args.follow))
+        .expect("Cannot run command");
 
     Ok(())
 }
 
+// the move and the switch, as one command list. The window manager runs a
+// whole list before it reads the next request from any client, so a
+// `childe --workspace-names` daemon cannot rename the new workspace between
+// the move and the switch, and the switch still finds it under `target`.
+fn navigation_command(target: &str, move_window: bool, follow: bool) -> String {
+    let mut commands = Vec::new();
+    if move_window {
+        commands.push(format!("move window to workspace {target}"));
+    }
+    if !move_window || follow {
+        commands.push(format!("workspace {target}"));
+    }
+    commands.join("; ")
+}
+
 // return index of active workspaces
-fn workspace_nums(connection: &mut Connection) -> Fallible<Vec<i32>> {
-    let nums = connection.get_workspaces()?.iter().map(|ws| ws.num).collect();
+fn workspace_nums(connection: &mut Connection) -> std::io::Result<Vec<i32>> {
+    let workspaces = connection.get_workspaces()?;
+    let nums = workspaces
+        .as_array()
+        .map(|list| {
+            list.iter()
+                .filter_map(|ws| ws.get("num").and_then(Value::as_i64))
+                .map(|num| num as i32)
+                .collect()
+        })
+        .unwrap_or_default();
 
     Ok(numbered_workspaces(nums))
 }
@@ -74,12 +100,16 @@ fn find_gap(items: &[i32]) -> i32 {
     items.last().unwrap_or(&0) + 1
 }
 
-// return the name of the next empty workspace
-async fn get_workspace_name(conn: &mut Connection) -> Result<String, Box<dyn Error>> {
+// return the workspace argument of the next empty workspace: its name from
+// the session's resources, or its number
+fn get_workspace_target(conn: &mut Connection) -> Result<String, Box<dyn Error>> {
     let gap_index = find_gap(&workspace_nums(conn)?);
     let resource_name = format!("wm.workspace.{:02}.name", gap_index);
-    let workspace_name = rescat(&resource_name, Some(format!("number {gap_index}"))).await?;
-    Ok(workspace_name)
+    let mut resources = Resources::for_session(conn.is_sway()?);
+    Ok(match resources.get(&resource_name) {
+        Some(name) => conn.quote(&name)?,
+        None => format!("number {gap_index}"),
+    })
 }
 
 #[cfg(test)]
@@ -166,5 +196,22 @@ mod test {
         let td = numbered_workspaces(vec![-1, 3, 1]);
 
         assert_eq!(2, find_gap(&td));
+    }
+
+    #[test]
+    fn test_navigation_command() {
+        assert_eq!(
+            "workspace \"3: Chat\"",
+            navigation_command("\"3: Chat\"", false, false)
+        );
+        assert_eq!(
+            "move window to workspace number 3",
+            navigation_command("number 3", true, false)
+        );
+        // one list, so a rename cannot land between the move and the switch
+        assert_eq!(
+            "move window to workspace \"3: Chat\"; workspace \"3: Chat\"",
+            navigation_command("\"3: Chat\"", true, true)
+        );
     }
 }
