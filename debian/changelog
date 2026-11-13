@@ -1,3 +1,10 @@
+childe (0.1.5) focal; urgency=medium
+
+  [ rego-port-bot ]
+  * fix: ignore unnumbered and duplicate workspaces when finding the next free one
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Fri, 13 Nov 2026 15:47:19 -0800
+
 childe (0.1.4) focal; urgency=medium
 
   [ Khosrow Moossavi ]
